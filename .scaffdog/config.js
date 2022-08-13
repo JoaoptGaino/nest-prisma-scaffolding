@@ -1,9 +1,10 @@
 module.exports = {
   files: ["./*"],
+  tags: ["<%", "%>"],
   helpers: [
     {
       prismaModel: (context, value) => {
-        const splitValue = value.split(",");
+        const splitValue = splitWordByComma(value);
 
         const upperCaseValues = splitValue.map((split) => {
           return upperCaseFirstLetter(split);
@@ -15,6 +16,18 @@ module.exports = {
         });
 
         return reversedValue.join(" ").toString();
+      },
+
+      createDto: (context, value) => {
+        const fields = splitWordByComma(value);
+
+        return fields.map((field) => {
+          return `
+              @IsOptional()
+              @IsString({ message: '"${field}" must be a string '})
+              ${field}:string;
+            `;
+        });
       },
 
       lowerFirst: (context, value) => {
@@ -33,7 +46,7 @@ module.exports = {
         if (wordArray.lengt > 1) {
           return wordArray.join("-").toLowerCase();
         }
-        return wordArray.toLowerCase();
+        return wordArray.join("").toLowerCase();
       },
     },
   ],
@@ -45,4 +58,8 @@ const splitWordByCamelCase = (value) => {
 
 const splitWordByComma = (value) => {
   return value.split(",");
+};
+
+const upperCaseFirstLetter = (value) => {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 };
